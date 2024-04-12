@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
+using System;
+using Microsoft.Extensions.Primitives;
 
 namespace JobBoardSiteAPIOfficial.Controllers
 {
@@ -17,21 +19,28 @@ namespace JobBoardSiteAPIOfficial.Controllers
     [ApiController]
     public class ApplicationUploadController : ControllerBase
     {
-        [HttpPost]
-        public string? UploadFile()
+        [HttpPost("{user_id}")]
+        public string? UploadFile(string user_id)
         {
-            Console.WriteLine("Uploading File");
-            var file = HttpContext.Request.Form.Files.Count > 0 ?
-                HttpContext.Request.Form.Files[0] : null;
-
-            if (file != null && file.Length > 0)
+            Console.WriteLine("Uploading File for " + user_id.ToString());
+            var success = false;
+            foreach (var file in HttpContext.Request.Form.Files)
             {
-                StreamWriter sw = new StreamWriter((Directory.GetCurrentDirectory().ToString() + "/Uploads/Test/" + file.FileName));
-                file.CopyTo(sw.BaseStream);
-                sw.Close();
+                if (file != null && file.Length > 0)
+                {
+                    string dir = (Directory.GetCurrentDirectory().ToString() + "/Uploads/Test/" + user_id + "/" + file.Name);
+                    Directory.CreateDirectory(dir);
+
+                    Console.WriteLine(file.Name);
+                    //Need to think about how we want store documents, "File Structure"
+                    StreamWriter sw = new StreamWriter(dir + "/" + file.FileName);
+                    file.CopyTo(sw.BaseStream);
+                    sw.Close();
+                    success = true;
+                }
             }
 
-            return file != null ? "Upload Successful" : null;
+            return success ? "Upload Successful" : null;
         }
     }
 }
