@@ -39,7 +39,7 @@ namespace JobBoardSiteAPIOfficial.Services.DocumentContentExtractor
             payload.Add("model", "gpt-3.5-turbo");
 
             systemMessage.Add("role", "system");
-            systemMessage.Add("content", "parse the incoming resume string and try to extract the Personal Summary, Relevant Skills, Education History, Work History, Volunteer History, Personal Projects, Awards. Put your response in strict JSON format (With Keys Personal_Summary, Relevant_Skills, Education_History, Work_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities)), Volunteer_History, Personal_Projects, Awards). Remove JSON violating characters from your response");
+            systemMessage.Add("content", "parse the incoming resume string and try to extract the Personal Summary, Relevant Skills, Education History, Work History, Volunteer History, Personal Projects, Awards. Put your response in strict JSON format (With Keys Personal_Summary, Relevant_Skills (Array of individual skills, no additional organization), Education_History (Array of dictionaries with keys (Degree, Subject, Graduation_Date, University)), Work_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities(Array of strings))), Volunteer_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities)), Personal_Projects (Values are dictionaries with keys (Title, Dates, Description)), Awards (Values are dictionaries with keys (Title, Dates, Description))). Remove JSON violating characters from your response. replace null values with empty arrays.");
 
             messages.Add(systemMessage);
 
