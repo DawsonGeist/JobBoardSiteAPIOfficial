@@ -1,0 +1,16 @@
+# Project overview
+
+We want a genuine, functioning job board.
+
+Applications need the ability to upload related files -> Need a section to add questions such as work and school which goes back to file upload
+
+Jobs need to be posted with salaries, desired skills
+
+TODO:
+
+1. File upload component for Applications
+1.a design the easy apply page
+1.b design the file upload component
+1.c research ftp-sockets for uploading from client to server and vice verse
+
+2. Update database to contain necessary fields for salary, and add table for tracking file content with job applications
