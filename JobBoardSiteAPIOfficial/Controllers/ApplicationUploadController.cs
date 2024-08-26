@@ -12,6 +12,7 @@ using System.Web.Http;
 using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
 using System;
 using Microsoft.Extensions.Primitives;
+using JobBoardSiteAPIOfficial.Services;
 
 namespace JobBoardSiteAPIOfficial.Controllers
 {
@@ -20,8 +21,9 @@ namespace JobBoardSiteAPIOfficial.Controllers
     public class ApplicationUploadController : ControllerBase
     {
         [HttpPost("{user_id}")]
-        public string? UploadFile(string user_id)
+        public List<Dictionary<string, string>> UploadFile(string user_id)
         {
+            List<Dictionary<string, string>> content = new List<Dictionary<string, string>>();
             Console.WriteLine("Uploading File for " + user_id.ToString());
             var success = false;
             foreach (var file in HttpContext.Request.Form.Files)
@@ -32,15 +34,22 @@ namespace JobBoardSiteAPIOfficial.Controllers
                     Directory.CreateDirectory(dir);
 
                     Console.WriteLine(file.Name);
+                    string filepath = dir + "/" + file.FileName;
                     //Need to think about how we want store documents, "File Structure"
-                    StreamWriter sw = new StreamWriter(dir + "/" + file.FileName);
+                    StreamWriter sw = new StreamWriter(filepath);
                     file.CopyTo(sw.BaseStream);
                     sw.Close();
                     success = true;
+
+
+                    // Extract Resume Content
+                    DocumentContentExtractorService dces = new DocumentContentExtractorService(DocumentContentExtractorService.DocumentType.RESUME, filepath);
+                    content.Add(dces.Extract());
                 }
             }
 
-            return success ? "Upload Successful" : null;
+
+            return content;
         }
     }
 }
