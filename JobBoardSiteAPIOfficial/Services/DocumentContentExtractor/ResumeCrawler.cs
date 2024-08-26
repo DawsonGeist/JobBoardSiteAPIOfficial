@@ -6,6 +6,7 @@ using Microsoft.Extensions.Primitives;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Text.Json.Nodes;
+using System.ComponentModel;
 
 namespace JobBoardSiteAPIOfficial.Services.DocumentContentExtractor
 {
@@ -39,7 +40,7 @@ namespace JobBoardSiteAPIOfficial.Services.DocumentContentExtractor
             payload.Add("model", "gpt-3.5-turbo");
 
             systemMessage.Add("role", "system");
-            systemMessage.Add("content", "parse the incoming resume string and try to extract the Personal Summary, Relevant Skills, Education History, Work History, Volunteer History, Personal Projects, Awards. Put your response in strict JSON format (With Keys Personal_Summary, Relevant_Skills (Array of individual skills, no additional organization), Education_History (Array of dictionaries with keys (Degree, Subject, Graduation_Date, University)), Work_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities(Array of strings))), Volunteer_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities)), Personal_Projects (Values are dictionaries with keys (Title, Dates, Description)), Awards (Values are dictionaries with keys (Title, Dates, Description))). Remove JSON violating characters from your response. replace null values with empty arrays.");
+            systemMessage.Add("content", "parse the incoming resume string and try to extract the Personal Summary, Relevant Skills, Education History, Work History, Volunteer History, Personal Projects, Awards. Put your response in strict JSON format (With Keys Personal_Summary, Relevant_Skills (Array of individual skills, no additional organization), Education_History (Array of dictionaries with keys (Degree, Subject, Graduation_Date, University)), Work_History (Array of dictionaries with keys (Title, Company, Dates, Responsibilities(Array of strings))), Volunteer_History (Values are dictionaries with keys (Title, Company, Dates, Responsibilities)), Personal_Projects (Values are dictionaries with keys (Title, Dates, Description)), Awards (Values are dictionaries with keys (Title, Dates, Description))). Remove JSON violating characters from your response. replace null/Empty values with empty arrays. All values should be stored in arrays except for Personal_Summary");
 
             messages.Add(systemMessage);
 
@@ -51,10 +52,20 @@ namespace JobBoardSiteAPIOfficial.Services.DocumentContentExtractor
             payload.Add("messages", messages);
 
             // Create the HttpContent for the form to be posted.
-            HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
-            req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "");//Fix this hide the api key like a man
-            req.Content = JsonContent.Create(payload);
-            req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            HttpRequestMessage req;
+            string? bear = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            Console.WriteLine($"{bear}"); 
+            if (bear != null)
+            {
+                req = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
+                req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bear);//Fix this hide the api key like a man
+                req.Content = JsonContent.Create(payload);
+                req.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            }
+            else
+            {
+                req = null;
+            }
 
 
             // Get the response.
@@ -66,6 +77,7 @@ namespace JobBoardSiteAPIOfficial.Services.DocumentContentExtractor
             // Get the response content.
             HttpContent responseContent = response.Content;
             var x = await responseContent.ReadAsStringAsync();
+            //Console.WriteLine(x);
             return x;
         }
 
